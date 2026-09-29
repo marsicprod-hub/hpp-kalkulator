@@ -10,4 +10,4 @@ app.innerHTML = `
     <section>
       <h2>Informasi Produk</h2>
     </section>
-  </main>';  
+  </main>`;
