@@ -9,5 +9,11 @@ app.innerHTML = `
   <main>
     <section>
       <h2>Informasi Produk</h2>
+      <label for="productName">Nama Produk</label>
+        <input
+          id="productName"
+          type="text"
+          placeholder="Contoh: Donat Cokelat"
+        />
     </section>
   </main>`;
