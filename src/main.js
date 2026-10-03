@@ -53,6 +53,7 @@ app.innerHTML = `
         <button id="addIngredient" type="button">
         Tambah Bahan
         </button>
+        <div id="ingredientList"></div>
     </section>  
   </main>`;
 const addIngredientButton = document.querySelector("#addIngredient");
@@ -60,6 +61,7 @@ const ingredientNameInput = document.querySelector("#ingredientName");
 const ingredientPriceInput = document.querySelector("#ingredientPrice");
 const ingredientWeightInput = document.querySelector("#ingredientWeight");
 const ingredientUsedInput = document.querySelector("#ingredientUsed");
+const ingredientList = document.querySelector("#ingredientList");
 const ingredients = [];
 
 addIngredientButton.addEventListener("click", () => {
@@ -76,7 +78,20 @@ addIngredientButton.addEventListener("click", () => {
     cost: ingredientCost,
   };
   ingredients.push(ingredient);
+  renderIngredients();
   alert(
     `Nama Bahan: ${ingredientNameInput.value}\nHarga Beli: ${ingredientPrice}\nBerat Bersih: ${ingredientWeight}\nJumlah Dipakai: ${ingredientUsed}\nHarga Per Gram: ${pricePerGram.toFixed(2)}\nBiaya Bahan: ${ingredientCost.toFixed(2)}`,
   );
 });
+function renderIngredients() {
+  ingredientList.innerHTML = "";
+
+  ingredients.forEach((item) => {
+    const card = document.createElement("div");
+    card.innerHTML = `
+      <strong>${item.name}</strong>
+      (${item.used}g)
+      Rp ${item.cost.toLocaleString("id-ID", { maximumFractionDigits: 0 })}`;
+    ingredientList.appendChild(card);
+  });
+}
