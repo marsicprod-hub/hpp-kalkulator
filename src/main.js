@@ -13,6 +13,8 @@ const state = JSON.parse(localStorage.getItem("hpp-kalkulator-state")) || {
   packaging: [],
 };
 
+const savedRecipes = JSON.parse(localStorage.getItem("hpp-kalkulator-recipes")) || [];
+
 const formatCurrency = (value) =>
   `Rp ${Number(value || 0).toLocaleString("id-ID", {
     maximumFractionDigits: 0,
@@ -75,7 +77,10 @@ app.innerHTML = `
       <h1>HPP Kalkulator</h1>
       <p class="subtitle">Hitung biaya produksi, HPP, harga jual, dan estimasi profit dalam satu tempat.</p>
     </div>
-    <button id="resetApp" class="button button-secondary" type="button">Reset Data</button>
+    <div class="header-actions">
+      <button id="saveRecipe" class="button" type="button">Simpan Resep</button>
+      <button id="resetApp" class="button button-secondary" type="button">Reset Data</button>
+    </div>
   </header>
 
   <main>
@@ -191,10 +196,23 @@ app.innerHTML = `
       <div id="packagingList" class="item-list"></div>
     </section>
 
-    <section class="card summary-card">
+    <section class="card recipe-card">
       <div class="section-heading">
         <div>
           <p class="section-number">07</p>
+          <h2>Resep Tersimpan</h2>
+          <p>Simpan beberapa produk dan panggil kembali kapan saja dari browser ini.</p>
+        </div>
+        <span id="recipeCount" class="badge">0 resep</span>
+      </div>
+      <div id="recipeList" class="recipe-list"></div>
+      <div id="recipeEmpty" class="empty-state">Belum ada resep tersimpan.</div>
+    </section>
+
+    <section class="card summary-card">
+      <div class="section-heading">
+        <div>
+          <p class="section-number">08</p>
           <h2>Ringkasan HPP</h2>
           <p>Semua komponen biaya produksi dirangkum otomatis.</p>
         </div>
@@ -315,6 +333,87 @@ el("resetApp").addEventListener("click", () => {
   location.reload();
 });
 
+const createRecipeSnapshot = () => ({
+  productName: state.productName,
+  totalDoughWeight: state.totalDoughWeight,
+  productWeight: state.productWeight,
+  margin: state.margin,
+  ingredients: state.ingredients.map((item) => ({ ...item })),
+  overheads: state.overheads.map((item) => ({ ...item })),
+  toppings: state.toppings.map((item) => ({ ...item })),
+  packaging: state.packaging.map((item) => ({ ...item })),
+});
+
+const saveRecipes = () => {
+  localStorage.setItem("hpp-kalkulator-recipes", JSON.stringify(savedRecipes));
+};
+
+const renderRecipes = () => {
+  const container = el("recipeList");
+  container.innerHTML = "";
+  el("recipeCount").textContent = `${savedRecipes.length} resep`;
+  el("recipeEmpty").hidden = savedRecipes.length > 0;
+
+  savedRecipes.forEach((recipe, index) => {
+    const card = document.createElement("div");
+    card.className = "recipe-row";
+    const savedDate = new Date(recipe.savedAt).toLocaleString("id-ID", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+
+    card.innerHTML = `
+      <div>
+        <strong>${recipe.productName || "Produk Tanpa Nama"}</strong>
+        <span>${savedDate} · ${recipe.ingredients.length} bahan</span>
+      </div>
+      <div class="recipe-actions">
+        <button class="button button-small" type="button">Buka</button>
+        <button class="icon-button" type="button" aria-label="Hapus resep">×</button>
+      </div>
+    `;
+
+    card.querySelector(".button-small").addEventListener("click", () => {
+      Object.assign(state, JSON.parse(JSON.stringify(recipe.data)));
+      saveState();
+      inputs.productName.value = state.productName;
+      inputs.margin.value = state.margin;
+      inputs.totalDoughWeight.value = state.totalDoughWeight || "";
+      inputs.productWeight.value = state.productWeight || "";
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    card.querySelector(".icon-button").addEventListener("click", () => {
+      savedRecipes.splice(index, 1);
+      saveRecipes();
+      renderRecipes();
+    });
+
+    container.appendChild(card);
+  });
+};
+
+el("saveRecipe").addEventListener("click", () => {
+  const name = state.productName.trim();
+
+  if (!name) {
+    inputs.productName.focus();
+    return;
+  }
+
+  savedRecipes.unshift({
+    id: crypto.randomUUID(),
+    productName: name,
+    savedAt: new Date().toISOString(),
+    ingredients: state.ingredients,
+    data: createRecipeSnapshot(),
+  });
+
+  saveRecipes();
+  renderRecipes();
+});
+
 const renderList = (containerId, type, formatter) => {
   const container = el(containerId);
   container.innerHTML = "";
@@ -363,6 +462,7 @@ function render() {
   renderList("overheadList", "overheads", () => "Biaya produksi");
   renderList("toppingList", "toppings", (item) => `${item.used}g per produk`);
   renderList("packagingList", "packaging", () => "per produk");
+  renderRecipes();
 }
 
 inputs.productName.value = state.productName;
