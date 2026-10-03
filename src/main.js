@@ -76,6 +76,7 @@ app.innerHTML = `
         </button>
         <div id="ingredientList"></div>
         <div id="ingredientTotal"></div>
+      <div id="baseHppResult"></div>
     </section>  
   </main>`;
 const addIngredientButton = document.querySelector("#addIngredient");
@@ -88,6 +89,7 @@ const ingredientTotal = document.querySelector("#ingredientTotal");
 const totalDoughWeightInput = document.querySelector("#totalDoughWeight");
 const productWeightInput = document.querySelector("#productWeight");
 const productionResult = document.querySelector("#productionResult");
+const baseHppResult = document.querySelector("#baseHppResult");
 const ingredients = [];
 
 addIngredientButton.addEventListener("click", () => {
@@ -110,6 +112,7 @@ addIngredientButton.addEventListener("click", () => {
   }, 0);
 
   ingredientTotal.textContent = `Total Biaya Bahan: Rp ${totalCost.toLocaleString("id-ID")}`;
+  calculateBaseHpp();
   ingredientNameInput.value = "";
   ingredientPriceInput.value = "";
   ingredientWeightInput.value = "";
@@ -133,6 +136,27 @@ function calculateProduction() {
 
 totalDoughWeightInput.addEventListener("input", calculateProduction);
 productWeightInput.addEventListener("input", calculateProduction);
+
+function calculateBaseHpp() {
+  const totalDoughWeight = Number(totalDoughWeightInput.value);
+  const productWeight = Number(productWeightInput.value);
+
+  const productCount = totalDoughWeight / productWeight;
+
+  const totalCost = ingredients.reduce((total, item) => {
+    return total + item.cost;
+  }, 0);
+
+  if (productCount > 0 && totalCost > 0) {
+    const baseHpp = totalCost / productCount;
+
+    baseHppResult.textContent = `HPP Bahan per Produk: Rp ${baseHpp.toLocaleString("id-ID", {
+      maximumFractionDigits: 0,
+    })}`;
+  } else {
+    baseHppResult.textContent = "";
+  }
+}
 function renderIngredients() {
   ingredientList.innerHTML = "";
 
