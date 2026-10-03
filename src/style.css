@@ -83,7 +83,7 @@ input {
   z-index: 1;
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 36px 0 72px;
+  padding: 24px 0 48px;
 }
 
 .app-header {
@@ -92,9 +92,9 @@ input {
   align-items: flex-end;
   justify-content: space-between;
   gap: 24px;
-  min-height: 190px;
-  margin-bottom: 26px;
-  padding: 34px;
+  min-height: 142px;
+  margin-bottom: 16px;
+  padding: 24px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: 30px;
@@ -169,15 +169,16 @@ h2 {
 main {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  align-items: start;
+  gap: 12px;
 }
 
 .card {
   position: relative;
-  padding: 24px;
+  padding: 18px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.8);
-  border-radius: 24px;
+  border-radius: 20px;
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(249, 250, 252, 0.72)),
     rgba(255, 255, 255, 0.68);
@@ -233,8 +234,8 @@ main {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
 .section-heading > div:first-child {
@@ -259,8 +260,8 @@ main {
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  margin-bottom: 18px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .ingredient-form {
@@ -270,7 +271,7 @@ main {
 label {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   color: #364152;
   font-size: 12px;
   font-weight: 800;
@@ -279,7 +280,7 @@ label {
 
 input {
   width: 100%;
-  padding: 13px 14px;
+  padding: 11px 12px;
   border: 1px solid rgba(148, 163, 184, 0.34);
   border-radius: 13px;
   outline: none;
@@ -325,8 +326,8 @@ input:focus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 42px;
-  padding: 11px 15px;
+  min-height: 38px;
+  padding: 9px 13px;
   border: 1px solid rgba(109, 93, 252, 0.4);
   border-radius: 13px;
   background: linear-gradient(135deg, #7466ff, #5c73ee);
@@ -402,8 +403,8 @@ input:focus {
 
 .item-list {
   display: grid;
-  gap: 8px;
-  margin-top: 16px;
+  gap: 6px;
+  margin-top: 10px;
 }
 
 .item-row,
@@ -412,11 +413,11 @@ input:focus {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 13px 14px;
+  gap: 10px;
+  padding: 10px 12px;
   overflow: hidden;
   border: 1px solid rgba(148, 163, 184, 0.17);
-  border-radius: 15px;
+  border-radius: 12px;
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(245, 247, 250, 0.58));
   box-shadow: 0 5px 18px rgba(23, 32, 51, 0.025);
@@ -496,8 +497,8 @@ input:focus {
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  margin-top: 16px;
-  padding-top: 16px;
+  margin-top: 12px;
+  padding-top: 12px;
   border-top: 1px dashed rgba(148, 163, 184, 0.28);
   color: #778296;
   font-size: 12px;
@@ -519,8 +520,8 @@ input:focus {
 .summary-grid > div,
 .pricing-grid > div {
   position: relative;
-  min-height: 84px;
-  padding: 15px;
+  min-height: 72px;
+  padding: 12px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.66);
   border-radius: 16px;
@@ -568,8 +569,8 @@ input:focus {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin: 18px 0 12px;
-  padding: 23px 24px;
+  margin: 12px 0 8px;
+  padding: 18px 20px;
   overflow: hidden;
   border: 1px solid rgba(117, 109, 255, 0.22);
   border-radius: 20px;
