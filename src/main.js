@@ -54,6 +54,7 @@ app.innerHTML = `
         Tambah Bahan
         </button>
         <div id="ingredientList"></div>
+        <div id="ingredientTotal"></div>
     </section>  
   </main>`;
 const addIngredientButton = document.querySelector("#addIngredient");
@@ -62,6 +63,7 @@ const ingredientPriceInput = document.querySelector("#ingredientPrice");
 const ingredientWeightInput = document.querySelector("#ingredientWeight");
 const ingredientUsedInput = document.querySelector("#ingredientUsed");
 const ingredientList = document.querySelector("#ingredientList");
+const ingredientTotal = document.querySelector("#ingredientTotal");
 const ingredients = [];
 
 addIngredientButton.addEventListener("click", () => {
@@ -79,9 +81,14 @@ addIngredientButton.addEventListener("click", () => {
   };
   ingredients.push(ingredient);
   renderIngredients();
-  alert(
-    `Nama Bahan: ${ingredientNameInput.value}\nHarga Beli: ${ingredientPrice}\nBerat Bersih: ${ingredientWeight}\nJumlah Dipakai: ${ingredientUsed}\nHarga Per Gram: ${pricePerGram.toFixed(2)}\nBiaya Bahan: ${ingredientCost.toFixed(2)}`,
-  );
+  const totalCost = ingredients.reduce((total, item) => {
+    return total + item.cost;
+  }, 0);
+  ingredientTotal.textContent = `Total Biaya Bahan: Rp ${totalCost.toLocaleString("id-ID")}`;
+  ingredientNameInput.value = "";
+  ingredientPriceInput.value = "";
+  ingredientWeightInput.value = "";
+  ingredientUsedInput.value = "";
 });
 function renderIngredients() {
   ingredientList.innerHTML = "";
