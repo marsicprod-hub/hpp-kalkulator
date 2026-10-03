@@ -289,3 +289,83 @@ input:focus {
   .card { padding: 18px; border-radius: 16px; }
   .grand-total { align-items: flex-start; flex-direction: column; }
 }
+
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.button-small {
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+.recipe-list {
+  display: grid;
+  gap: 8px;
+}
+
+.recipe-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px;
+  border: 1px solid #edf0f2;
+  border-radius: 13px;
+  background: #fafbfc;
+}
+
+.recipe-row strong {
+  display: block;
+}
+
+.recipe-row span {
+  display: block;
+  margin-top: 4px;
+  color: #8a919a;
+  font-size: 12px;
+}
+
+.recipe-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-button {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: #eceff1;
+  color: #6b7280;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.empty-state {
+  padding: 18px;
+  border: 1px dashed #d8dde3;
+  border-radius: 12px;
+  color: #8a919a;
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .header-actions {
+    width: 100%;
+  }
+
+  .header-actions .button {
+    flex: 1;
+  }
+
+  .recipe-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
