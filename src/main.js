@@ -17,6 +17,27 @@ app.innerHTML = `
         />
     </section>
     <section>
+      <h2>Informasi Produksi</h2>
+      <div>
+        <label for="totalDoughWeight">Total Berat Adonan</label>
+        <input
+          id="totalDoughWeight"
+          type="number"
+          placeholder="Contoh: 2000"
+        />
+      </div>
+      <div>
+        <label for="productWeight">Berat per Produk</label>
+        <input
+          id="productWeight"
+          type="number"
+          placeholder="Contoh: 25"
+        />
+      </div>
+      <div id="productionResult"></div>
+    </section>
+
+    <section>
       <h2>Bahan</h2>
       <div>
         <label for="ingredientName">Nama Bahan</label>
@@ -64,6 +85,9 @@ const ingredientWeightInput = document.querySelector("#ingredientWeight");
 const ingredientUsedInput = document.querySelector("#ingredientUsed");
 const ingredientList = document.querySelector("#ingredientList");
 const ingredientTotal = document.querySelector("#ingredientTotal");
+const totalDoughWeightInput = document.querySelector("#totalDoughWeight");
+const productWeightInput = document.querySelector("#productWeight");
+const productionResult = document.querySelector("#productionResult");
 const ingredients = [];
 
 addIngredientButton.addEventListener("click", () => {
@@ -84,12 +108,31 @@ addIngredientButton.addEventListener("click", () => {
   const totalCost = ingredients.reduce((total, item) => {
     return total + item.cost;
   }, 0);
+
   ingredientTotal.textContent = `Total Biaya Bahan: Rp ${totalCost.toLocaleString("id-ID")}`;
   ingredientNameInput.value = "";
   ingredientPriceInput.value = "";
   ingredientWeightInput.value = "";
   ingredientUsedInput.value = "";
 });
+
+function calculateProduction() {
+  const totalDoughWeight = Number(totalDoughWeightInput.value);
+  const productWeight = Number(productWeightInput.value);
+
+  if (totalDoughWeight > 0 && productWeight > 0) {
+    const productCount = totalDoughWeight / productWeight;
+
+    productionResult.textContent = `Perkiraan Jumlah Produk: ${productCount.toLocaleString("id-ID", {
+      maximumFractionDigits: 0,
+    })} pcs`;
+  } else {
+    productionResult.textContent = "";
+  }
+}
+
+totalDoughWeightInput.addEventListener("input", calculateProduction);
+productWeightInput.addEventListener("input", calculateProduction);
 function renderIngredients() {
   ingredientList.innerHTML = "";
 
