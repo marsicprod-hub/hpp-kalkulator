@@ -826,6 +826,13 @@ textarea:focus-visible {
   border: 0 !important;
 }
 
+.summary-product-name {
+  margin: 6px 0 0;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 800;
+}
+
 .field-note {
   margin: -2px 0 12px;
   color: #7d8797;
@@ -953,6 +960,15 @@ textarea:focus-visible {
   #app {
     width: 100%;
     padding: 0;
+  }
+
+  .app-header,
+  main > .card:not(.summary-card) {
+    display: none !important;
+  }
+
+  main > .summary-card {
+    display: block !important;
   }
 
   .app-header {
