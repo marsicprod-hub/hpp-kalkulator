@@ -225,16 +225,18 @@ function showToast(message) {
   showToast.timer = window.setTimeout(() => toast.classList.remove("is-visible"), 2800);
 }
 
-function normalizePair(quantity, unit, baseUnit) {
-  const factors = {
-    g: { g: 1, kg: 1000 },
-    kg: { g: 0.001, kg: 1 },
-    ml: { ml: 1, l: 1000 },
-    l: { ml: 0.001, l: 1 },
-    pcs: { pcs: 1 },
+function normalizePair(quantity, unit, targetUnit) {
+  const unitMeta = {
+    g: { group: "mass", factor: 1 },
+    kg: { group: "mass", factor: 1000 },
+    ml: { group: "volume", factor: 1 },
+    l: { group: "volume", factor: 1000 },
+    pcs: { group: "count", factor: 1 },
   };
-  if (factors[unit]?.[baseUnit] === undefined) return null;
-  return quantity * factors[unit][baseUnit];
+  const source = unitMeta[unit];
+  const target = unitMeta[targetUnit];
+  if (!source || !target || source.group !== target.group) return null;
+  return (quantity * source.factor) / target.factor;
 }
 
 function costFromPackage(price, packageQuantity, packageUnit, usedQuantity, usedUnit) {
@@ -279,7 +281,7 @@ el("addIngredient").addEventListener("click", () => {
   const usedUnit = inputs.ingredientUsedUnit.value;
   const name = inputs.ingredientName.value.trim();
   const cost = costFromPackage(price, packageQuantity, packageUnit, usedQuantity, usedUnit);
-  if (!name || !Number.isFinite(price) || price < 0 || cost === null) {
+  if (!name || inputs.ingredientPrice.value === "" || !Number.isFinite(price) || price < 0 || cost === null) {
     showToast("Periksa nama, harga, isi kemasan, dan satuan pemakaian.");
     return;
   }
@@ -305,7 +307,7 @@ el("addTopping").addEventListener("click", () => {
   const price = Number(inputs.toppingPrice.value);
   const weight = Number(inputs.toppingWeight.value);
   const used = Number(inputs.toppingUsed.value);
-  if (!name || !Number.isFinite(price) || price < 0 || weight <= 0 || used <= 0) {
+  if (!name || inputs.toppingPrice.value === "" || !Number.isFinite(price) || price < 0 || weight <= 0 || used <= 0) {
     showToast("Isi topping, harga, isi kemasan, dan pemakaian yang valid.");
     return;
   }
