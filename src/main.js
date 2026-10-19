@@ -16,7 +16,7 @@ const DEFAULT_STATE = {
   toppings: [],
   packaging: [],
   fixedCosts: 0,
-  targetProfit: 0,
+  targetUnits: 0,
 };
 
 const safeParse = (value, fallback) => {
@@ -37,16 +37,12 @@ const state = {
   packaging: Array.isArray(loadedState.packaging) ? loadedState.packaging : [],
 };
 
-const savedRecipes = safeParse(localStorage.getItem(STORAGE_KEYS.recipes), []);
+const loadedRecipes = safeParse(localStorage.getItem(STORAGE_KEYS.recipes), []);
+const savedRecipes = Array.isArray(loadedRecipes) ? loadedRecipes : [];
 const formatCurrency = (value) =>
   `Rp ${Number(value || 0).toLocaleString("id-ID", { maximumFractionDigits: 0 })}`;
 const formatNumber = (value, digits = 2) =>
   Number(value || 0).toLocaleString("id-ID", { maximumFractionDigits: digits });
-const escapeHTML = (value) =>
-  String(value ?? "").replace(/[&<>"']/g, (character) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-  })[character]);
-
 const saveState = () => localStorage.setItem(STORAGE_KEYS.state, JSON.stringify(state));
 const saveRecipes = () => localStorage.setItem(STORAGE_KEYS.recipes, JSON.stringify(savedRecipes));
 const calculateProductCount = () => {
@@ -73,6 +69,7 @@ const calculateTotals = () => {
   const sellingPrice = hppPerProduct > 0 ? hppPerProduct / (1 - margin / 100) : 0;
   const roundedSellingPrice = sellingPrice > 0 ? Math.ceil(sellingPrice / 100) * 100 : 0;
   const profitPerProduct = roundedSellingPrice - hppPerProduct;
+  const actualMargin = roundedSellingPrice > 0 ? (profitPerProduct / roundedSellingPrice) * 100 : 0;
   const estimatedProfit = profitPerProduct * productCount;
   const breakEvenUnits = roundedSellingPrice > 0 && roundedSellingPrice > hppPerProduct
     ? Math.ceil(Math.max(0, Number(state.fixedCosts) || 0) / (roundedSellingPrice - hppPerProduct))
@@ -82,7 +79,7 @@ const calculateTotals = () => {
   return {
     productCount, ingredientTotal, overheadTotal, toppingPerProduct, packagingPerProduct,
     toppingTotal, packagingTotal, totalProductionCost, hppPerProduct,
-    sellingPrice: roundedSellingPrice, profitPerProduct, estimatedProfit,
+    sellingPrice: roundedSellingPrice, profitPerProduct, actualMargin, estimatedProfit,
     breakEvenUnits, breakEvenRevenue,
   };
 };
@@ -191,6 +188,7 @@ app.innerHTML = `
         <div><span>Omzet Saat Titik Impas</span><strong id="breakEvenRevenue">Rp 0</strong></div>
         <div><span>Estimasi omzet target</span><strong id="targetRevenue">Rp 0</strong></div>
         <div><span>Estimasi profit target*</span><strong id="targetProfit">Rp 0</strong></div>
+        <div><span>Margin aktual setelah pembulatan</span><strong id="actualMargin">0%</strong></div>
       </div>
       <p class="field-note">*Estimasi target mengurangi biaya tetap dari kontribusi profit per produk. Belum termasuk pajak, diskon, produk gagal, atau biaya penjualan lain yang belum dicatat.</p>
       <div class="summary-actions"><button id="printSummary" class="button" type="button">Cetak / Simpan PDF</button><button id="shareSummary" class="button button-secondary" type="button">Salin Ringkasan</button></div>
@@ -249,6 +247,7 @@ function costFromPackage(price, packageQuantity, packageUnit, usedQuantity, used
 function updateInputState() {
   state.productName = inputs.productName.value;
   state.margin = Math.min(99, Math.max(0, Number(inputs.margin.value) || 0));
+  inputs.margin.value = state.margin;
   state.totalDoughWeight = Math.max(0, Number(inputs.totalDoughWeight.value) || 0);
   state.productWeight = Math.max(0, Number(inputs.productWeight.value) || 0);
   state.fixedCosts = Math.max(0, Number(inputs.fixedCosts.value) || 0);
@@ -486,6 +485,7 @@ function render() {
   el("sellingPrice").textContent = formatCurrency(totals.sellingPrice);
   el("profitPerProduct").textContent = formatCurrency(totals.profitPerProduct);
   el("estimatedProfit").textContent = formatCurrency(totals.estimatedProfit);
+  el("actualMargin").textContent = `${formatNumber(totals.actualMargin, 1)}%`;
   el("breakEvenUnits").textContent = `${totals.breakEvenUnits} pcs`;
   el("breakEvenRevenue").textContent = formatCurrency(totals.breakEvenRevenue);
 
