@@ -170,7 +170,7 @@ app.innerHTML = `
     </section>
 
     <section class="card summary-card">
-      <div class="section-heading"><div><p class="section-number">09</p><h2>Ringkasan HPP & Harga Jual</h2><p>Nilai diperbarui otomatis saat data diubah.</p></div></div>
+      <div class="section-heading"><div><p class="section-number">09</p><h2>Ringkasan HPP & Harga Jual</h2><p>Nilai diperbarui otomatis saat data diubah.</p><p id="summaryProductName" class="summary-product-name"></p></div></div>
       <div class="summary-grid">
         <div><span>Bahan Adonan</span><strong id="summaryIngredient">Rp 0</strong></div>
         <div><span>Overhead Batch</span><strong id="summaryOverhead">Rp 0</strong></div>
@@ -455,6 +455,7 @@ function makeSummary(totals) {
     `Total biaya produksi: ${formatCurrency(totals.totalProductionCost)}`,
     `HPP per produk: ${formatCurrency(totals.hppPerProduct)}`,
     `Harga jual rekomendasi: ${formatCurrency(totals.sellingPrice)}`,
+    `Margin aktual setelah pembulatan: ${formatNumber(totals.actualMargin, 1)}%`,
     `Estimasi profit per produk: ${formatCurrency(totals.profitPerProduct)}`,
     `Estimasi profit per batch: ${formatCurrency(totals.estimatedProfit)}`,
     `Titik impas: ${totals.breakEvenUnits} pcs / ${formatCurrency(totals.breakEvenRevenue)}`,
@@ -495,6 +496,7 @@ function render() {
   el("targetRevenue").textContent = formatCurrency(targetRevenue);
   el("targetProfit").textContent = formatCurrency(targetProfit);
 
+  el("summaryProductName").textContent = state.productName.trim() || "Produk belum diberi nama";
   el("summaryText").value = makeSummary(totals);
   renderList("ingredientList", "ingredients", (item) => {
     const quantity = item.usedUnit ? `${formatNumber(item.used)} ${item.usedUnit}` : `${formatNumber(item.used)} g`;
