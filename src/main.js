@@ -639,9 +639,14 @@ function render() {
   const targetProfit = targetUnits * totals.profitPerProduct - Math.max(0, Number(state.fixedCosts) || 0);
   el("targetRevenue").textContent = formatCurrency(targetRevenue);
   el("targetProfit").textContent = formatCurrency(targetProfit);
-
+  el("summaryBatchCount").textContent = `${totals.productCount} pcs`;
+  el("summaryTotalCost").textContent = formatCurrency(totals.totalProductionCost);
+  el("mobileHpp").textContent = formatCurrency(totals.hppPerProduct);
+  el("mobileSellingPrice").textContent = formatCurrency(totals.sellingPrice);
+  el("headerProductName").textContent = state.productName.trim() || "Produk baru";
   el("summaryProductName").textContent = state.productName.trim() || "Produk belum diberi nama";
   el("summaryText").value = makeSummary(totals);
+  updateWorkflowUI(totals);
   renderList("ingredientList", "ingredients", (item) => {
     const quantity = item.usedUnit ? `${formatNumber(item.used)} ${item.usedUnit}` : `${formatNumber(item.used)} g`;
     const purchased = item.packageUnit ? ` · beli ${formatNumber(item.packageQuantity)} ${item.packageUnit}` : "";
@@ -695,6 +700,69 @@ el("backupFile").addEventListener("change", async (event) => {
     showToast(error instanceof Error ? error.message : "File backup tidak bisa dibaca.");
   } finally {
     event.target.value = "";
+  }
+});
+
+function updateWorkflowUI(totals) {
+  const completion = {
+    setup: Boolean(state.productName.trim()) && totals.productCount > 0,
+    materials: state.ingredients.length > 0,
+    overheads: state.overheads.length > 0 || state.toppings.length > 0 || state.packaging.length > 0,
+    planning: Number(state.fixedCosts) > 0 || Number(state.targetUnits) > 0 || savedRecipes.length > 0,
+    summary: totals.hppPerProduct > 0 && totals.sellingPrice > 0,
+  };
+  const done = Object.values(completion).filter(Boolean).length;
+  el("workflowProgressText").textContent = `${done} dari 5 bagian`;
+  el("workflowProgressBar").style.width = `${(done / 5) * 100}%`;
+  el("sidebarRecipeCount").textContent = `${savedRecipes.length} resep tersimpan`;
+
+  document.querySelectorAll("[data-workflow-link]").forEach((link) => {
+    const isComplete = completion[link.dataset.workflowLink];
+    link.dataset.complete = String(Boolean(isComplete));
+    const status = link.querySelector(".workflow-link-status");
+    if (status) status.textContent = isComplete ? "✓" : "•";
+  });
+}
+
+const workflowLinks = [...document.querySelectorAll("[data-workflow-link]")];
+const setActiveWorkflowLink = (key) => {
+  workflowLinks.forEach((link) => {
+    const active = link.dataset.workflowLink === key;
+    link.classList.toggle("is-active", active);
+    if (active) link.setAttribute("aria-current", "step");
+    else link.removeAttribute("aria-current");
+  });
+};
+
+workflowLinks.forEach((link) => {
+  link.addEventListener("click", () => setActiveWorkflowLink(link.dataset.workflowLink));
+});
+
+if ("IntersectionObserver" in window) {
+  const workflowObserver = new IntersectionObserver((entries) => {
+    const visible = entries
+      .filter((entry) => entry.isIntersecting)
+      .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+    if (visible.length) setActiveWorkflowLink(visible[0].target.dataset.workflowPanel);
+  }, { rootMargin: "-18% 0px -68% 0px", threshold: 0 });
+  document.querySelectorAll("[data-workflow-panel]").forEach((panel) => workflowObserver.observe(panel));
+}
+
+el("backupMenu").addEventListener("click", () => {
+  const popover = el("backupPopover");
+  const open = popover.hidden;
+  popover.hidden = !open;
+  el("backupMenu").setAttribute("aria-expanded", String(open));
+});
+document.addEventListener("click", (event) => {
+  if (event.target.closest(".action-menu")) return;
+  el("backupPopover").hidden = true;
+  el("backupMenu").setAttribute("aria-expanded", "false");
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    el("backupPopover").hidden = true;
+    el("backupMenu").setAttribute("aria-expanded", "false");
   }
 });
 
