@@ -1068,7 +1068,8 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   .item-actions, .recipe-actions { gap: 6px; }
   .section-total { align-items: flex-start; font-size: 9px; }
   .section-total strong { font-size: 10px; }
-  .summary-rail { display: none; }
+  .summary-rail { display: block; position: static; }
+  .summary-card { display: block; }
   .workspace-footer { flex-direction: column; gap: 5px; font-size: 8px; }
   .mobile-summary-dock {
     position: fixed;
