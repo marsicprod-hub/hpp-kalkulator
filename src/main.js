@@ -86,115 +86,259 @@ const calculateTotals = () => {
 
 app.innerHTML = `
   <header class="app-header">
-    <div>
-      <p class="eyebrow">PRODUCTION COSTING · UMKM</p>
-      <h1>HPP Kalkulator</h1>
-      <p class="subtitle">Dari takaran resep sampai harga jual, margin, dan titik impas. Biar jualan pakai hitungan, bukan tebak-tebakan.</p>
+    <a class="brand-lockup" href="#step-setup" aria-label="HPP Studio, ke awal kalkulator">
+      <span class="brand-mark">H</span>
+      <span class="brand-copy">
+        <strong>hpp<span>studio</span></strong>
+        <small>WORKSPACE UMKM</small>
+      </span>
+    </a>
+    <div class="header-context">
+      <span class="header-context-dot"></span>
+      <span>Ruang kerja produksi</span>
+      <span class="header-context-separator">/</span>
+      <span id="headerProductName">Produk baru</span>
     </div>
     <div class="header-actions">
-      <button id="saveRecipe" class="button" type="button">Simpan Resep</button>
-      <button id="exportData" class="button button-secondary" type="button">Ekspor Backup</button>
-      <button id="importData" class="button button-secondary" type="button">Impor Backup</button>
-      <input id="backupFile" class="visually-hidden" type="file" accept="application/json,.json" />
-      <button id="resetApp" class="button button-secondary" type="button">Reset Data</button>
+      <button id="saveRecipe" class="button button-primary" type="button"><span class="button-icon">＋</span> Simpan resep</button>
+      <div class="action-menu">
+        <button id="backupMenu" class="button button-secondary" type="button" aria-label="Pilihan backup" aria-expanded="false"><span class="button-icon">↕</span><span class="backup-label">Backup</span><span aria-hidden="true">⌄</span></button>
+        <div id="backupPopover" class="action-popover" hidden>
+          <button id="exportData" type="button"><span>↗</span><span><strong>Ekspor data</strong><small>Unduh file backup JSON</small></span></button>
+          <button id="importData" type="button"><span>↙</span><span><strong>Impor data</strong><small>Pulihkan dari file backup</small></span></button>
+        </div>
+        <input id="backupFile" class="visually-hidden" type="file" accept="application/json,.json" />
+      </div>
+      <button id="resetApp" class="icon-utility" type="button" aria-label="Reset kalkulator" title="Reset data aktif">↺</button>
     </div>
   </header>
 
-  <main>
-    <section class="card product-card">
-      <div class="section-heading"><div><p class="section-number">01</p><h2>Informasi Produk</h2></div></div>
-      <div class="form-grid">
-        <label>Nama Produk<input id="productName" type="text" placeholder="Contoh: Donat Cokelat" /></label>
-        <label>Target Margin (%)<input id="margin" type="number" min="0" max="99" step="1" /><span class="field-hint">Margin dihitung dari harga jual, bukan markup dari HPP.</span></label>
+  <div class="app-shell">
+    <aside class="workflow-sidebar" aria-label="Navigasi alur kerja">
+      <div class="sidebar-overline">ALUR KERJA</div>
+      <div class="workflow-nav" role="navigation" aria-label="Langkah kalkulator">
+        <a class="workflow-link is-active" href="#step-setup" data-workflow-link="setup">
+          <span class="workflow-link-icon">01</span>
+          <span class="workflow-link-copy"><strong>Mulai produk</strong><small>Identitas & hasil batch</small></span>
+          <span class="workflow-link-status" aria-hidden="true">•</span>
+        </a>
+        <a class="workflow-link" href="#step-materials" data-workflow-link="materials">
+          <span class="workflow-link-icon">02</span>
+          <span class="workflow-link-copy"><strong>Bahan adonan</strong><small>Takaran & biaya bahan</small></span>
+          <span class="workflow-link-status" aria-hidden="true">•</span>
+        </a>
+        <a class="workflow-link" href="#step-overheads" data-workflow-link="overheads">
+          <span class="workflow-link-icon">03</span>
+          <span class="workflow-link-copy"><strong>Biaya tambahan</strong><small>Overhead, topping, kemasan</small></span>
+          <span class="workflow-link-status" aria-hidden="true">•</span>
+        </a>
+        <a class="workflow-link" href="#step-planning" data-workflow-link="planning">
+          <span class="workflow-link-icon">04</span>
+          <span class="workflow-link-copy"><strong>Target & resep</strong><small>Titik impas dan simpanan</small></span>
+          <span class="workflow-link-status" aria-hidden="true">•</span>
+        </a>
+        <a class="workflow-link" href="#summary-card" data-workflow-link="summary">
+          <span class="workflow-link-icon workflow-result-icon">↗</span>
+          <span class="workflow-link-copy"><strong>Ringkasan HPP</strong><small>Harga jual & profit</small></span>
+          <span class="workflow-link-status" aria-hidden="true">•</span>
+        </a>
       </div>
-    </section>
 
-    <section class="card">
-      <div class="section-heading"><div><p class="section-number">02</p><h2>Rencana Produksi</h2></div><span id="productionBadge" class="badge">0 pcs</span></div>
-      <div class="form-grid">
-        <label>Total Berat Adonan (gram)<input id="totalDoughWeight" type="number" min="0" step="any" placeholder="2000" /></label>
-        <label>Berat per Produk (gram)<input id="productWeight" type="number" min="0" step="any" placeholder="25" /></label>
+      <div class="sidebar-progress">
+        <div class="sidebar-progress-top"><span>Kelengkapan</span><strong id="workflowProgressText">0 dari 5 bagian</strong></div>
+        <div class="progress-track"><span id="workflowProgressBar"></span></div>
+        <p>Isi data bertahap. Hasil HPP diperbarui otomatis saat ada perubahan.</p>
       </div>
-      <div id="productionResult" class="inline-result"></div>
-      <div class="field-note">Jumlah produk memakai bilangan bulat ke bawah. Sisa adonan tidak dihitung sebagai produk jadi.</div>
-    </section>
 
-    <section class="card">
-      <div class="section-heading"><div><p class="section-number">03</p><h2>Bahan Adonan</h2></div><span id="ingredientCount" class="badge">0 bahan</span></div>
-      <div class="form-grid ingredient-form">
-        <label>Nama Bahan<input id="ingredientName" type="text" placeholder="Tepung terigu" /></label>
-        <label>Harga Beli (Rp)<input id="ingredientPrice" type="number" min="0" step="any" placeholder="15000" /></label>
-        <label>Isi Kemasan<input id="ingredientWeight" type="number" min="0" step="any" placeholder="1" /></label>
-        <label>Satuan Kemasan<select id="ingredientUnit"><option value="g">Gram (g)</option><option value="kg">Kilogram (kg)</option><option value="ml">Mililiter (ml)</option><option value="l">Liter (L)</option><option value="pcs">Butir/pcs</option></select></label>
-        <label>Jumlah Dipakai<input id="ingredientUsed" type="number" min="0" step="any" placeholder="250" /></label>
-        <label>Satuan Pemakaian<select id="ingredientUsedUnit"><option value="g">Gram (g)</option><option value="kg">Kilogram (kg)</option><option value="ml">Mililiter (ml)</option><option value="l">Liter (L)</option><option value="pcs">Butir/pcs</option></select></label>
+      <a class="sidebar-recipe-shortcut" href="#recipe-card">
+        <span class="shortcut-icon">▤</span>
+        <span><strong>Perpustakaan resep</strong><small id="sidebarRecipeCount">0 resep tersimpan</small></span>
+        <span class="shortcut-arrow">↗</span>
+      </a>
+      <div class="sidebar-footnote"><span class="privacy-icon">⌑</span><span>Data tersimpan di browser ini. Ekspor backup sebelum pindah perangkat.</span></div>
+    </aside>
+
+    <main class="workflow-main">
+      <div class="workspace-heading">
+        <div>
+          <div class="workspace-kicker"><span class="kicker-line"></span> PRODUCTION WORKSPACE</div>
+          <h1>Hitung biaya.<br /><span>Jual dengan yakin.</span></h1>
+          <p>Bangun resep, hitung biaya produksi, lalu temukan harga jual yang masuk akal.</p>
+        </div>
+        <div class="workspace-date"><span class="date-indicator"></span><span>Mode kalkulasi lokal</span></div>
       </div>
-      <p class="field-note">Konversi g↔kg dan ml↔liter otomatis. Butir/pcs hanya bisa dihitung dengan satuan yang sama. Telur tetap bisa dicatat per butir tanpa dipaksa jadi gram.</p>
-      <button id="addIngredient" class="button" type="button">+ Tambah Bahan</button>
-      <div id="ingredientList" class="item-list"></div>
-      <div class="section-total"><span>Total biaya bahan untuk 1 batch</span><strong id="ingredientTotal">Rp 0</strong></div>
-    </section>
 
-    <section class="card">
-      <div class="section-heading"><div><p class="section-number">04</p><h2>Overhead Produksi</h2><p>Biaya untuk satu batch, misalnya gas, listrik, atau tenaga kerja.</p></div><strong id="overheadTotal" class="section-total-value">Rp 0</strong></div>
-      <div class="form-grid"><label>Nama Biaya<input id="overheadName" type="text" placeholder="Gas, listrik, tenaga kerja..." /></label><label>Total Biaya (Rp)<input id="overheadCost" type="number" min="0" step="any" placeholder="25000" /></label></div>
-      <button id="addOverhead" class="button" type="button">+ Tambah Overhead</button><div id="overheadList" class="item-list"></div>
-    </section>
+      <section id="step-setup" class="workflow-stage" data-workflow-panel="setup">
+        <div class="stage-heading">
+          <div class="stage-number">01</div>
+          <div><p class="stage-kicker">MULAI DARI SINI</p><h2>Kenali produkmu</h2><p>Atur identitas produk dan target hasil produksi.</p></div>
+        </div>
+        <div class="stage-grid setup-grid">
+          <section class="card product-card">
+            <div class="card-heading">
+              <div class="card-heading-symbol product-symbol">✳</div>
+              <div><h3>Informasi produk</h3><p>Nama dan target margin keuntungan.</p></div>
+            </div>
+            <div class="form-grid">
+              <label>Nama produk<input id="productName" type="text" placeholder="Contoh: Donat Cokelat" /></label>
+              <label>Target margin (%)<input id="margin" type="number" min="0" max="99" step="1" /><span class="field-hint">Margin dihitung dari harga jual, bukan markup HPP.</span></label>
+            </div>
+          </section>
 
-    <section class="card">
-      <div class="section-heading"><div><p class="section-number">05</p><h2>Topping per Produk</h2><p>Biaya bahan topping yang digunakan untuk satu produk.</p></div><strong id="toppingTotal" class="section-total-value">Rp 0</strong></div>
-      <div class="form-grid ingredient-form">
-        <label>Nama Topping<input id="toppingName" type="text" placeholder="Cokelat" /></label>
-        <label>Harga Beli (Rp)<input id="toppingPrice" type="number" min="0" step="any" placeholder="20000" /></label>
-        <label>Isi Kemasan (gram/ml)<input id="toppingWeight" type="number" min="0" step="any" placeholder="200" /></label>
-        <label>Pakai per Produk (gram/ml)<input id="toppingUsed" type="number" min="0" step="any" placeholder="10" /></label>
-      </div>
-      <button id="addTopping" class="button" type="button">+ Tambah Topping</button><div id="toppingList" class="item-list"></div>
-    </section>
+          <section class="card production-card">
+            <div class="card-heading">
+              <div class="card-heading-symbol production-symbol">◉</div>
+              <div><h3>Hasil produksi</h3><p>Berapa produk yang dihasilkan dari satu batch?</p></div>
+              <span id="productionBadge" class="badge badge-accent">0 pcs</span>
+            </div>
+            <div class="form-grid">
+              <label>Total berat adonan (g)<input id="totalDoughWeight" type="number" min="0" step="any" placeholder="2000" /></label>
+              <label>Berat per produk (g)<input id="productWeight" type="number" min="0" step="any" placeholder="25" /></label>
+            </div>
+            <div id="productionResult" class="inline-result">Masukkan berat adonan dan produk.</div>
+            <p class="field-note">Hasil produksi memakai jumlah produk utuh. Sisa adonan dihitung terpisah.</p>
+          </section>
+        </div>
+      </section>
 
-    <section class="card">
-      <div class="section-heading"><div><p class="section-number">06</p><h2>Kemasan per Produk</h2><p>Biaya box, plastik, label, stiker, atau paper bag per produk.</p></div><strong id="packagingTotal" class="section-total-value">Rp 0</strong></div>
-      <div class="form-grid"><label>Nama Kemasan<input id="packagingName" type="text" placeholder="Box donat" /></label><label>Harga per Unit (Rp)<input id="packagingPrice" type="number" min="0" step="any" placeholder="1500" /></label></div>
-      <button id="addPackaging" class="button" type="button">+ Tambah Kemasan</button><div id="packagingList" class="item-list"></div>
-    </section>
+      <section id="step-materials" class="workflow-stage" data-workflow-panel="materials">
+        <div class="stage-heading">
+          <div class="stage-number">02</div>
+          <div><p class="stage-kicker">RESEP DASAR</p><h2>Masukkan bahan adonan</h2><p>Biaya dihitung otomatis dari harga beli dan jumlah yang digunakan.</p></div>
+          <span id="ingredientCount" class="badge">0 bahan</span>
+        </div>
+        <section class="card ingredient-card">
+          <div class="card-heading">
+            <div class="card-heading-symbol ingredient-symbol">⌁</div>
+            <div><h3>Komposisi bahan</h3><p>Isi satuan kemasan dan satuan pemakaian. Konversi yang sesuai akan dihitung otomatis.</p></div>
+          </div>
+          <div class="form-grid ingredient-form">
+            <label class="field-wide">Nama bahan<input id="ingredientName" type="text" placeholder="Tepung terigu" /></label>
+            <label>Harga beli (Rp)<input id="ingredientPrice" type="number" min="0" step="any" placeholder="15000" /></label>
+            <label>Isi kemasan<input id="ingredientWeight" type="number" min="0" step="any" placeholder="1" /></label>
+            <label>Satuan kemasan<select id="ingredientUnit"><option value="g">Gram (g)</option><option value="kg">Kilogram (kg)</option><option value="ml">Mililiter (ml)</option><option value="l">Liter (L)</option><option value="pcs">Butir/pcs</option></select></label>
+            <label>Jumlah dipakai<input id="ingredientUsed" type="number" min="0" step="any" placeholder="250" /></label>
+            <label>Satuan pemakaian<select id="ingredientUsedUnit"><option value="g">Gram (g)</option><option value="kg">Kilogram (kg)</option><option value="ml">Mililiter (ml)</option><option value="l">Liter (L)</option><option value="pcs">Butir/pcs</option></select></label>
+          </div>
+          <div class="form-note-row"><span class="note-check">✓</span><p>Gram ↔ kilogram dan ml ↔ liter didukung. Butir/pcs hanya dikonversi ke satuan yang sama, karena telur tidak otomatis berubah jadi gram tanpa asumsi.</p></div>
+          <div class="card-action-row"><button id="addIngredient" class="button button-primary" type="button"><span class="button-icon">＋</span> Tambah bahan</button><span class="action-hint">Bisa tambah bahan sebanyak yang dibutuhkan.</span></div>
+          <div id="ingredientList" class="item-list"></div>
+          <div class="section-total"><span>Total biaya bahan · 1 batch</span><strong id="ingredientTotal">Rp 0</strong></div>
+        </section>
+      </section>
 
-    <section class="card">
-      <div class="section-heading"><div><p class="section-number">07</p><h2>Biaya Tetap & Target</h2><p>Untuk simulasi titik impas, misalnya biaya sewa atau langganan bulanan.</p></div></div>
-      <div class="form-grid"><label>Biaya Tetap Per Periode (Rp)<input id="fixedCosts" type="number" min="0" step="any" placeholder="500000" /></label><label>Target Produk Terjual (pcs)<input id="targetUnits" type="number" min="0" step="1" placeholder="100" /></label></div>
-      <p class="field-note">Biaya tetap hanya dipakai untuk menghitung titik impas. Pilih periode konsisten dengan target penjualan yang Anda rencanakan.</p>
-    </section>
+      <section id="step-overheads" class="workflow-stage" data-workflow-panel="overheads">
+        <div class="stage-heading">
+          <div class="stage-number">03</div>
+          <div><p class="stage-kicker">BIAYA PENDUKUNG</p><h2>Lengkapi biaya produksi</h2><p>Jangan sampai ada biaya kecil yang diam-diam menggerus keuntungan.</p></div>
+        </div>
+        <div class="stage-grid cost-grid">
+          <section class="card cost-card overhead-card">
+            <div class="card-heading">
+              <div class="card-heading-symbol overhead-symbol">⌂</div>
+              <div><h3>Overhead batch</h3><p>Gas, listrik, tenaga kerja, atau biaya produksi lain.</p></div>
+            </div>
+            <div class="form-grid"><label>Nama biaya<input id="overheadName" type="text" placeholder="Gas, listrik, tenaga kerja..." /></label><label>Total biaya (Rp)<input id="overheadCost" type="number" min="0" step="any" placeholder="25000" /></label></div>
+            <button id="addOverhead" class="button button-secondary" type="button"><span class="button-icon">＋</span> Tambah overhead</button>
+            <div id="overheadList" class="item-list"></div>
+            <div class="section-total"><span>Subtotal overhead</span><strong id="overheadTotal">Rp 0</strong></div>
+          </section>
 
-    <section class="card recipe-card">
-      <div class="section-heading"><div><p class="section-number">08</p><h2>Resep Tersimpan</h2><p>Simpan dan buka kembali resep di browser ini.</p></div><span id="recipeCount" class="badge">0 resep</span></div>
-      <div id="recipeList" class="recipe-list"></div><div id="recipeEmpty" class="empty-state">Belum ada resep tersimpan.</div>
-    </section>
+          <section class="card cost-card topping-card">
+            <div class="card-heading">
+              <div class="card-heading-symbol topping-symbol">✺</div>
+              <div><h3>Topping per produk</h3><p>Hitung biaya topping sesuai takaran per produk.</p></div>
+            </div>
+            <div class="form-grid"><label>Nama topping<input id="toppingName" type="text" placeholder="Cokelat" /></label><label>Harga beli (Rp)<input id="toppingPrice" type="number" min="0" step="any" placeholder="20000" /></label><label>Isi kemasan (g/ml)<input id="toppingWeight" type="number" min="0" step="any" placeholder="200" /></label><label>Pakai per produk (g/ml)<input id="toppingUsed" type="number" min="0" step="any" placeholder="10" /></label></div>
+            <button id="addTopping" class="button button-secondary" type="button"><span class="button-icon">＋</span> Tambah topping</button>
+            <div id="toppingList" class="item-list"></div>
+            <div class="section-total"><span>Biaya topping per produk</span><strong id="toppingTotal">Rp 0 / produk</strong></div>
+          </section>
 
-    <section class="card summary-card">
-      <div class="section-heading"><div><p class="section-number">09</p><h2>Ringkasan HPP & Harga Jual</h2><p>Nilai diperbarui otomatis saat data diubah.</p><p id="summaryProductName" class="summary-product-name"></p></div></div>
-      <div class="summary-grid">
-        <div><span>Bahan Adonan</span><strong id="summaryIngredient">Rp 0</strong></div>
-        <div><span>Overhead Batch</span><strong id="summaryOverhead">Rp 0</strong></div>
-        <div><span>Topping Batch</span><strong id="summaryTopping">Rp 0</strong></div>
-        <div><span>Kemasan Batch</span><strong id="summaryPackaging">Rp 0</strong></div>
-      </div>
-      <div class="grand-total"><span>HPP per Produk</span><strong id="finalHpp">Rp 0</strong></div>
-      <div class="pricing-grid">
-        <div><span>Harga Jual Rekomendasi</span><strong id="sellingPrice">Rp 0</strong></div>
-        <div><span>Profit per Produk</span><strong id="profitPerProduct">Rp 0</strong></div>
-        <div><span>Estimasi Profit 1 Batch</span><strong id="estimatedProfit">Rp 0</strong></div>
-      </div>
-      <div class="break-even-panel">
-        <div><span>Titik Impas (produk)</span><strong id="breakEvenUnits">0 pcs</strong></div>
-        <div><span>Omzet Saat Titik Impas</span><strong id="breakEvenRevenue">Rp 0</strong></div>
-        <div><span>Estimasi omzet target</span><strong id="targetRevenue">Rp 0</strong></div>
-        <div><span>Estimasi profit target*</span><strong id="targetProfit">Rp 0</strong></div>
-        <div><span>Margin aktual setelah pembulatan</span><strong id="actualMargin">0%</strong></div>
-      </div>
-      <p class="field-note">*Estimasi target mengurangi biaya tetap dari kontribusi profit per produk. Belum termasuk pajak, diskon, produk gagal, atau biaya penjualan lain yang belum dicatat.</p>
-      <div class="summary-actions"><button id="printSummary" class="button" type="button">Cetak / Simpan PDF</button><button id="shareSummary" class="button button-secondary" type="button">Salin Ringkasan</button></div>
-      <textarea id="summaryText" class="summary-text" readonly aria-label="Ringkasan HPP untuk disalin"></textarea>
-    </section>
-  </main>
+          <section class="card cost-card packaging-card">
+            <div class="card-heading">
+              <div class="card-heading-symbol packaging-symbol">▱</div>
+              <div><h3>Kemasan per produk</h3><p>Box, plastik, label, stiker, atau paper bag.</p></div>
+            </div>
+            <div class="form-grid"><label>Nama kemasan<input id="packagingName" type="text" placeholder="Box donat" /></label><label>Harga per unit (Rp)<input id="packagingPrice" type="number" min="0" step="any" placeholder="1500" /></label></div>
+            <button id="addPackaging" class="button button-secondary" type="button"><span class="button-icon">＋</span> Tambah kemasan</button>
+            <div id="packagingList" class="item-list"></div>
+            <div class="section-total"><span>Biaya kemasan per produk</span><strong id="packagingTotal">Rp 0 / produk</strong></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="step-planning" class="workflow-stage" data-workflow-panel="planning">
+        <div class="stage-heading">
+          <div class="stage-number">04</div>
+          <div><p class="stage-kicker">PERENCANAAN USAHA</p><h2>Rencanakan target dan simpan resep</h2><p>Gunakan angka biaya tetap untuk simulasi titik impas. Simpan resep agar mudah dipakai lagi.</p></div>
+        </div>
+        <div class="stage-grid planning-grid">
+          <section class="card planning-card">
+            <div class="card-heading">
+              <div class="card-heading-symbol target-symbol">◎</div>
+              <div><h3>Target penjualan</h3><p>Periode biaya tetap dan target produk harus konsisten.</p></div>
+            </div>
+            <div class="form-grid"><label>Biaya tetap per periode (Rp)<input id="fixedCosts" type="number" min="0" step="any" placeholder="500000" /></label><label>Target produk terjual (pcs)<input id="targetUnits" type="number" min="0" step="1" placeholder="100" /></label></div>
+            <p class="field-note">Biaya tetap bisa berupa sewa, langganan, atau biaya lain yang tidak bergantung langsung pada jumlah produk.</p>
+          </section>
+
+          <section id="recipe-card" class="card recipe-card">
+            <div class="card-heading">
+              <div class="card-heading-symbol recipe-symbol">▤</div>
+              <div><h3>Perpustakaan resep</h3><p>Simpan versi resep dan buka lagi saat produksi berikutnya.</p></div>
+              <span id="recipeCount" class="badge">0 resep</span>
+            </div>
+            <div id="recipeList" class="recipe-list"></div>
+            <div id="recipeEmpty" class="empty-state"><span class="empty-state-icon">＋</span><strong>Belum ada resep tersimpan</strong><span>Selesaikan data produk, lalu pilih “Simpan resep”.</span></div>
+          </section>
+        </div>
+      </section>
+      <footer class="workspace-footer"><span>HPP Studio</span><span>Periksa hasil kalkulasi sebelum menentukan harga jual.</span></footer>
+    </main>
+
+    <aside class="summary-rail" aria-label="Ringkasan HPP">
+      <section id="summary-card" class="card summary-card" data-workflow-panel="summary">
+        <div class="summary-rail-heading"><div><p class="stage-kicker">LIVE CALCULATION</p><h2>Ringkasan HPP</h2></div><span class="live-pill"><span></span> Live</span></div>
+        <p id="summaryProductName" class="summary-product-name">Produk belum diberi nama</p>
+        <div class="summary-output">
+          <span class="summary-output-label">HPP per produk</span>
+          <strong id="finalHpp">Rp 0</strong>
+          <span class="summary-output-caption">Modal produksi untuk satu produk</span>
+        </div>
+        <div class="summary-price-highlight"><div><span>Harga jual rekomendasi</span><strong id="sellingPrice">Rp 0</strong></div><span class="price-arrow">↗</span></div>
+        <div class="summary-profit-row">
+          <div><span>Profit / produk</span><strong id="profitPerProduct">Rp 0</strong></div>
+          <div><span>Margin aktual</span><strong id="actualMargin">0%</strong></div>
+        </div>
+        <div class="summary-breakdown-heading"><h3>Rincian biaya batch</h3><span id="summaryBatchCount">0 pcs</span></div>
+        <div class="summary-breakdown">
+          <div><span><i class="breakdown-dot ingredient-dot"></i>Bahan adonan</span><strong id="summaryIngredient">Rp 0</strong></div>
+          <div><span><i class="breakdown-dot overhead-dot"></i>Overhead</span><strong id="summaryOverhead">Rp 0</strong></div>
+          <div><span><i class="breakdown-dot topping-dot"></i>Topping</span><strong id="summaryTopping">Rp 0</strong></div>
+          <div><span><i class="breakdown-dot packaging-dot"></i>Kemasan</span><strong id="summaryPackaging">Rp 0</strong></div>
+        </div>
+        <div class="summary-total-row"><span>Total biaya satu batch</span><strong id="summaryTotalCost">Rp 0</strong></div>
+        <div class="summary-batch-profit"><span>Estimasi profit satu batch</span><strong id="estimatedProfit">Rp 0</strong></div>
+        <div class="summary-break-even">
+          <div><span>Titik impas</span><strong id="breakEvenUnits">0 pcs</strong></div>
+          <div><span>Omzet titik impas</span><strong id="breakEvenRevenue">Rp 0</strong></div>
+          <div><span>Omzet target</span><strong id="targetRevenue">Rp 0</strong></div>
+          <div><span>Profit target*</span><strong id="targetProfit">Rp 0</strong></div>
+        </div>
+        <p class="summary-disclaimer">*Estimasi berdasarkan data yang dimasukkan, belum termasuk pajak, diskon, produk gagal, dan biaya penjualan lain yang belum dicatat.</p>
+        <div class="summary-actions"><button id="printSummary" class="button button-primary" type="button"><span class="button-icon">↧</span> Cetak / simpan PDF</button><button id="shareSummary" class="button button-secondary" type="button"><span class="button-icon">▣</span> Salin ringkasan</button></div>
+        <textarea id="summaryText" class="summary-text" readonly aria-label="Ringkasan HPP untuk disalin"></textarea>
+      </section>
+    </aside>
+  </div>
+
+  <div id="mobileSummaryDock" class="mobile-summary-dock">
+    <div class="mobile-summary-copy"><span>HPP / produk</span><strong id="mobileHpp">Rp 0</strong></div>
+    <div class="mobile-summary-divider"></div>
+    <div class="mobile-summary-copy"><span>Harga jual</span><strong id="mobileSellingPrice">Rp 0</strong></div>
+    <a href="#summary-card" class="mobile-summary-open">Lihat hasil <span>↗</span></a>
+  </div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 `;
 
