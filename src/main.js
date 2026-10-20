@@ -745,7 +745,7 @@ if ("IntersectionObserver" in window) {
       .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
     if (visible.length) setActiveWorkflowLink(visible[0].target.dataset.workflowPanel);
   }, { rootMargin: "-18% 0px -68% 0px", threshold: 0 });
-  document.querySelectorAll("[data-workflow-panel]").forEach((panel) => workflowObserver.observe(panel));
+  document.querySelectorAll('[data-workflow-panel]:not([data-workflow-panel="summary"])').forEach((panel) => workflowObserver.observe(panel));
 }
 
 el("backupMenu").addEventListener("click", () => {
